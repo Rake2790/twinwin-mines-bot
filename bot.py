@@ -1,4 +1,5 @@
 import logging
+import numpy as np
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 from telegram.error import Conflict
@@ -10,7 +11,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Replace with your bot token (regenerate via @BotFather if needed)
-BOT_TOKEN = "8408573813:AAFHKBel9UZ2QvaTIpNa_5UsmcKSIF2gxYo"
+BOT_TOKEN = "8408573813:AAEPEq1ntw5O4Zmuq_2tA74mouM1CrMbjHA"
 
 # Flag to track if the bot is already running
 _is_running = False
@@ -23,12 +24,28 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     """Handler for the /help command."""
     await update.message.reply_text("Help is on the way! Contact @Rake27900 for support.")
 
+async def predict(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handler for the /predict command with a number argument."""
+    if not context.args:
+        await update.message.reply_text("Please provide a number, e.g., /predict 3")
+        return
+    try:
+        number = int(context.args[0])
+        if number <= 0:
+            await update.message.reply_text("Please provide a positive number.")
+            return
+        # Example prediction using numpy (random probability)
+        prediction = np.random.random() * number
+        await update.message.reply_text(f"Predicted value: {prediction:.2f} (based on {number})")
+    except ValueError:
+        await update.message.reply_text("Invalid input. Please provide a valid number.")
+
 async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handle errors globally."""
     logger.error(f"Update {update} caused error {context.error}")
     if isinstance(context.error, Conflict):
         logger.error("Conflict detected: Another instance is running. Shutting down.")
-        raise context.error  # Re-raise to stop the application
+        raise context.error
 
 def main() -> None:
     """Main function to run the bot."""
@@ -49,6 +66,7 @@ def main() -> None:
         # Add handlers
         application.add_handler(CommandHandler("start", start))
         application.add_handler(CommandHandler("help", help_command))
+        application.add_handler(CommandHandler("predict", predict))
         application.add_error_handler(error_handler)
 
         # Start the bot with allowed updates as a list
