@@ -5,7 +5,7 @@ intel-cmplr-lic-rt==2025.2.1
 intel-fortran-rt==2025.2.1
 intel-openmp==2025.2.1
 mkl==2025.2.0
-numpy @ file:///C:/Users/PC/twinwin_mines_bot/numpy-2.3.3-cp313-cp313-win_amd64.whl#sha256=fed9f7da4a9ca2ec304d5a4e23dfe914178ff02422db30d221fcd9e7254262a5
+numpy==2.3.3
 tbb==2022.2.0
 tcmlib==1.4.0
 umf==0.11.0
