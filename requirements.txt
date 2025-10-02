@@ -13,3 +13,9 @@ tcmlib==1.4.0
 umf==0.11.0
 python-telegram-bot
 cryptography
+numpy
+opencv-python
+tensorflow
+keras
+pillow
+python-dotenv
