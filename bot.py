@@ -1,11 +1,13 @@
+from dotenv import load_dotenv
 import os
 import cv2
 from tensorflow.keras.models import load_model
 import numpy as np
 import telebot
-
-# Initialize bot with your token (replace 'YOUR_BOT_TOKEN' with your actual token from BotFather)
-bot = telebot.TeleBot('8408573813:AAHnb6z4Az9R5TfAFNYc9kTR_YyAju9I2tE')
+load_dotenv()
+BOT_TOKEN = os.getenv('8408573813:AAHD6_xT_PU0EjeeIqo5BQxI9kYg5mhbURA')
+if not BOT_TOKEN:
+    raise ValueError("BOT_TOKEN environment variable not set.")
 
 # Load only the mine model
 mine_model = load_model(os.path.join(os.path.dirname(__file__), 'mines_tile_model.h5'))
