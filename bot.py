@@ -1,23 +1,25 @@
 from dotenv import load_dotenv
 import os
-import cv2
-from tensorflow.keras.models import load_model
-import numpy as np
-import telebot
+
 load_dotenv()
 BOT_TOKEN = os.getenv('8408573813:AAHD6_xT_PU0EjeeIqo5BQxI9kYg5mhbURA')
 if not BOT_TOKEN:
     raise ValueError("BOT_TOKEN environment variable not set.")
 
+import cv2
+from tensorflow.keras.models import load_model
+import numpy as np
+import telebot
+
+# Initialize bot with environment variable token
+bot = telebot.TeleBot(BOT_TOKEN)
+
 # Load only the mine model
 mine_model = load_model(os.path.join(os.path.dirname(__file__), 'mines_tile_model.h5'))
 
 def process_image(file):
-    """
-    Process the uploaded image into a 5x5 grid of 32x32 tiles and predict mines/safe.
-    """
     img = cv2.imread(file)
-    img = cv2.resize(img, (350, 350))  # Assume 5x5 grid with 70x70 tiles
+    img = cv2.resize(img, (350, 350))
     tiles = []
     for i in range(5):
         for j in range(5):
@@ -27,29 +29,23 @@ def process_image(file):
     tiles = np.array(tiles)
 
     mine_preds = mine_model.predict(tiles)
-    mine_map = (mine_preds < 0.5).astype(int)  # 0 = safe, 1 = mine
-    number_map = np.zeros(25, dtype=int)  # Placeholder, all zeros if no number model
+    mine_map = (mine_preds < 0.5).astype(int)
+    number_map = np.zeros(25, dtype=int)
     return mine_map, number_map
 
 def deduce_mines(mine_map, number_map):
-    """
-    Deduce the grid state based on mine predictions (numbers ignored for now).
-    """
     grid = np.zeros((5, 5))
     for i in range(5):
         for j in range(5):
             idx = i * 5 + j
-            if mine_map[idx] == 0:  # Safe tile
-                grid[i, j] = number_map[idx]  # Will be 0 if no number model
-            else:  # Mine tile
-                grid[i, j] = -1  # Represent mines as -1
+            if mine_map[idx] == 0:
+                grid[i, j] = number_map[idx]
+            else:
+                grid[i, j] = -1
     return grid
 
 @bot.message_handler(content_types=['photo'])
 def handle_photo(message):
-    """
-    Handle uploaded photo, process the 5x5 grid, and store safe/mine positions in lists.
-    """
     file_id = message.photo[-1].file_id
     file = bot.get_file(file_id)
     downloaded_file = bot.download_file(file.file_path)
@@ -64,9 +60,9 @@ def handle_photo(message):
     for i in range(5):
         for j in range(5):
             idx = i * 5 + j
-            if mine_map[idx] == 0:  # Safe tile
+            if mine_map[idx] == 0:
                 safe_positions.append([i, j])
-            else:  # Mine tile
+            else:
                 mine_positions.append([i, j])
     
     response = f"Grid Analysis (5x5):\nSafe tiles: {len(safe_positions)}\nMines: {len(mine_positions)}\n"
@@ -79,9 +75,6 @@ def handle_photo(message):
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-    """
-    Handle /start command with a welcome message.
-    """
     bot.reply_to(message, "Welcome! Upload a 5x5 Mines game board image to analyze.")
 
 if __name__ == "__main__":
