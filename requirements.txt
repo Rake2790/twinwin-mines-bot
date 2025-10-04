@@ -7,7 +7,6 @@ intel-openmp==2025.2.1
 mkl==2025.2.0
 --find-links https://github.com/cgohlke/numpy-mkl-wheels/releases/download/2025.9.14
 numpy==2.3.3
-numpy==2.3.3
 tbb==2022.2.0
 tcmlib==1.4.0
 umf==0.11.0
@@ -18,4 +17,7 @@ opencv-python
 tensorflow
 keras
 pillow
-python-dotenv
+python-dotenv==0.20.0
+flask
+pyTelegramBotAPI
+flask

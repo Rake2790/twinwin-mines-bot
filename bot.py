@@ -4,6 +4,11 @@ from tensorflow.keras.models import load_model
 import numpy as np
 import telebot
 from dotenv import load_dotenv
+from flask import Flask
+
+# Initialize Flask app for Render Web Service
+app = Flask(__name__)
+port = int(os.getenv("PORT", 5000))  # Default to 5000 if PORT not set by Render
 
 # Load environment variables with explicit path to .env file
 current_dir = os.path.dirname(__file__)
@@ -147,9 +152,22 @@ def send_welcome(message):
     except Exception as e:
         print(f"Error in send_welcome: {str(e)}")
 
+# Minimal Flask route to satisfy Render Web Service requirements
+@app.route('/')
+def health_check():
+    return "Bot is running", 200
+
+# Run the Flask app with bot polling in a separate thread
 if __name__ == "__main__":
-    print("Starting bot polling...")
+    print("Starting bot polling and Flask app...")
     try:
-        bot.polling()
+        # Start bot polling in a background thread
+        import threading
+        def polling_thread():
+            bot.polling(none_stop=True)
+        threading.Thread(target=polling_thread, daemon=True).start()
+        
+        # Run Flask app on the specified port
+        app.run(host='0.0.0.0', port=port)
     except Exception as e:
-        print(f"Bot polling failed: {str(e)}")
+        print(f"Application failed: {str(e)}")
