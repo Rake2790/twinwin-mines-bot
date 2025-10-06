@@ -141,16 +141,47 @@ def handle_photo(message):
         bot.reply_to(message, f"Error processing photo: {str(e)}")
         print(f"Error in handle_photo: {str(e)}")
 
-@bot.message_handler(commands=['start'])
+@@bot.message_handler(commands=['start'])
 def send_welcome(message):
-    """
-    Handle /start command with a welcome message.
-    """
     try:
+        print(f"Received /start from user {message.from_user.username} (ID: {message.from_user.id}) at {message.date}")
         bot.reply_to(message, "Welcome! Upload a 5x5 Mines game board image to analyze.")
         print("Sent welcome message.")
     except Exception as e:
         print(f"Error in send_welcome: {str(e)}")
+
+@bot.message_handler(commands=['predict'])
+def handle_predict(message):
+    try:
+        args = message.text.split()[1:]
+        if not args:
+            bot.reply_to(message, "Usage: /predict <number> (e.g., /predict 3)")
+            print("Predict command received with no argument.")
+            return
+        try:
+            num = int(args[0])
+            bot.reply_to(message, f"Received /predict {num}. This feature is under development. Please upload a 5x5 image for analysis.")
+            print(f"Predict command received with argument: {num}")
+        except ValueError:
+            bot.reply_to(message, "Please provide a valid number after /predict.")
+            print("Invalid number argument for /predict.")
+    except Exception as e:
+        print(f"Error in handle_predict: {str(e)}")
+
+if __name__ == "__main__":
+    print("Starting bot polling and Flask app...")
+    try:
+        import threading
+        def polling_thread():
+            try:
+                print("Starting bot polling...")
+                bot.polling(none_stop=True)
+            except Exception as e:
+                print(f"Polling error: {str(e)}")
+        threading.Thread(target=polling_thread, daemon=True).start()
+        app.run(host='0.0.0.0', port=port)
+    except Exception as e:
+        print(f"Application failed: {str(e)}")
 
 # Minimal Flask route to satisfy Render Web Service requirements
 @app.route('/')
