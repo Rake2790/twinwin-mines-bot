@@ -4,7 +4,7 @@ from tensorflow.keras.models import load_model
 import numpy as np
 import telebot
 from dotenv import load_dotenv
-from flask import Flask
+from flask import Flask, request
 
 app = Flask(__name__)
 port = int(os.getenv("PORT", 10000))
@@ -96,6 +96,14 @@ def send_welcome(message):
     except Exception as e:
         print(f"Error in send_welcome: {str(e)}")
 
+# Webhook route to handle Telegram updates
+@app.route('/webhook', methods=['POST'])
+def webhook():
+    update = request.get_json()
+    if update:
+        bot.process_new_updates([telebot.types.Update.de_json(update)])
+    return '', 200
+
 @app.route('/')
 def health_check():
     return "Bot is running", 200
@@ -103,5 +111,5 @@ def health_check():
 if __name__ == "__main__":
     print("Setting webhook and running Flask app...")
     bot.remove_webhook()
-    bot.set_webhook(url="https://twinwin-mines-bot.onrender.com/")
+    bot.set_webhook(url="https://twinwin-mines-bot.onrender.com/webhook")
     app.run(host='0.0.0.0', port=port)
