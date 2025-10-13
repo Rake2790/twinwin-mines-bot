@@ -31,12 +31,12 @@ try:
 except Exception as e:
     raise RuntimeError(f"Failed to initialize bot: {str(e)}")
 
-# Load the three-class model
+# Load the pre-game model
 try:
-    pregame_model = load_model(os.path.join(current_dir, 'pregame_three_class_model.h5'))
-    print("Three-class pre-game model loaded successfully.")
+    pregame_model = load_model(os.path.join(current_dir, 'pregame_model.h5'))
+    print("Pre-game model loaded successfully.")
 except Exception as e:
-    raise FileNotFoundError(f"Failed to load pregame_three_class_model.h5: {str(e)}")
+    raise FileNotFoundError(f"Failed to load pregame_model.h5: {str(e)}")
 
 def process_image(file_path):
     try:
@@ -67,9 +67,10 @@ def handle_photo(message):
             new_file.write(downloaded_file)
         
         preds = process_image('image.png')
-        unrevealed_positions = [[i, j] for i in range(5) for j in range(5) if preds[i*5+j, 2] > 0.5]
-        mine_positions = [[i, j] for i in range(5) for j in range(5) if preds[i*5+j, 1] > 0.5 and preds[i*5+j, 2] <= 0.5]
-        safe_positions = [[i, j] for i in range(5) for j in range(5) if preds[i*5+j, 0] > 0.5 and preds[i*5+j, 2] <= 0.5]
+        classifications = np.argmax(preds, axis=1)
+        unrevealed_positions = [[i, j] for i in range(5) for j in range(5) if classifications[i*5+j] == 2]
+        mine_positions = [[i, j] for i in range(5) for j in range(5) if classifications[i*5+j] == 1]
+        safe_positions = [[i, j] for i in range(5) for j in range(5) if classifications[i*5+j] == 0]
 
         response = f"Pre-Game Prediction (5x5):\nUnrevealed tiles: {len(unrevealed_positions)}\nMines: {len(mine_positions)}\nSafe tiles: {len(safe_positions)}\n"
         for pos in unrevealed_positions:
