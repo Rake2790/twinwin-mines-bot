@@ -1,5 +1,5 @@
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.optimizers import Adam
 
@@ -7,7 +7,10 @@ model = Sequential([
     Conv2D(32, (3, 3), activation='relu', input_shape=(32, 32, 3)),
     MaxPooling2D((2, 2)),
     Conv2D(64, (3, 3), activation='relu'),
+    MaxPooling2D((2, 2)),
     Flatten(),
+    Dense(64, activation='relu'),
+    Dropout(0.5),  # Add dropout for regularization
     Dense(3, activation='softmax')
 ])
 
@@ -25,6 +28,6 @@ validation_generator = datagen.flow_from_directory(
     subset='validation', classes=['mine', 'safe', 'unrevealed_tiles']
 )
 
-model.fit(train_generator, epochs=5, validation_data=validation_generator)
+model.fit(train_generator, epochs=10, validation_data=validation_generator)  # Increase epochs
 model.save('pregame_model.h5')
 print("Training done")
